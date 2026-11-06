@@ -1,0 +1,46 @@
+name: Build VST3
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows
+          - os: macos-latest
+            name: macos
+          - os: ubuntu-latest
+            name: linux
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.name }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Linux dependencies
+        if: matrix.name == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libxext-dev libxinerama-dev libxrandr-dev \
+            libxcursor-dev libfreetype-dev libfontconfig1-dev
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: DSP tests
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Upload VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: SixThirty-${{ matrix.name }}-vst3
+          path: build/SixThirty_artefacts/Release/VST3/SixThirty.vst3
