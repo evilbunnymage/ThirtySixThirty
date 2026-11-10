@@ -1,4 +1,4 @@
-# SixThirty
+# ThirtySixThirty
 
 A VST3 compressor / limiter / gate modelled on the signal flow of the Alesis 3630.
 Unofficial homage: not affiliated with Alesis, and "3630" is their trademark, so don't
